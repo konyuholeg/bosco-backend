@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ company.name }} — Internship Tracker{% endblock %}
+{% block content %}
+<a href="{% url 'tracker:company_list' %}" class="back-link">← Усі компанії</a>
+<h1 class="page-title">{{ company.name }}</h1>
+{% if company.website %}<p><a href="{{ company.website }}" target="_blank" rel="noopener">{{ company.website }}</a></p>{% endif %}
+{% for vacancy in vacancies %}
+  {% include 'includes/vacancy_card.html' %}
+{% empty %}
+  <div class="card">У цієї компанії поки немає вакансій.</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}{{ skill.title }} — Internship Tracker{% endblock %}
+{% block content %}
+<a href="{% url 'tracker:skill_list' %}" class="back-link">← Усі навички</a>
+<h1 class="page-title">Вакансії з вимогою «{{ skill.title }}»</h1>
+{% for vacancy in vacancies %}
+  {% include 'includes/vacancy_card.html' %}
+{% empty %}
+  <div class="card">Вакансій із цією навичкою поки немає.</div>
+{% endfor %}
+{% endblock %}

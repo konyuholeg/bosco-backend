@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load tracker_tags %}
+
+{% block title %}Нагадування — Internship Tracker{% endblock %}
+
+{% block content %}
+{% with vacancy=reminder.application.vacancy %}
+<div style="max-width:720px; margin:0 auto;">
+  <div style="margin-bottom:16px;"><a href="{% url 'tracker:reminder_list' %}" class="back-link">← До нагадувань</a></div>
+
+  <div class="card">
+    <div style="margin-bottom:10px;">{% reminder_badge reminder %}</div>
+    <dl class="mb-0" style="font-size:14px;">
+      <dt style="color:var(--text-muted); font-weight:600; font-size:12px;">Дата</dt>
+      <dd>{{ reminder.remind_at|date:"d.m.Y" }}</dd>
+      <dt style="color:var(--text-muted); font-weight:600; font-size:12px;">Текст</dt>
+      <dd>{{ reminder.text }}</dd>
+      <dt style="color:var(--text-muted); font-weight:600; font-size:12px;">Вакансія</dt>
+      <dd><a href="{{ vacancy.get_absolute_url }}">{{ vacancy.company.name }} — {{ vacancy.position }}</a></dd>
+      <dt style="color:var(--text-muted); font-weight:600; font-size:12px;">Заявка</dt>
+      <dd class="mb-0"><a href="{{ reminder.application.get_absolute_url }}">{{ reminder.application.get_status_display }}</a></dd>
+    </dl>
+
+    <div class="card-actions">
+      {% if perms.tracker.change_reminder %}
+        <form method="POST" action="{% url 'tracker:reminder_toggle' reminder.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-secondary btn-sm">{% if reminder.is_done %}Повернути в активні{% else %}Позначити виконаним{% endif %}</button>
+        </form>
+        <a href="{% url 'tracker:reminder_edit' reminder.pk %}" class="btn btn-outline-secondary btn-sm">Змінити</a>
+      {% endif %}
+      {% if perms.tracker.delete_reminder %}
+        <a href="{% url 'tracker:reminder_delete' reminder.pk %}" class="btn btn-outline-danger btn-sm">Видалити</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Реєстрація — Internship Tracker{% endblock %}
+
+{% block content %}
+<div class="mx-auto my-5" style="max-width:400px;">
+  <h1 style="font-size:22px; font-weight:700; margin-bottom:14px;">Реєстрація</h1>
+  <div class="card">
+    <form method="POST">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary w-100">Зареєструватися</button>
+    </form>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:14px; text-align:center;">
+      Вже є обліковий запис? <a href="{% url 'tracker:login' %}">Увійти</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

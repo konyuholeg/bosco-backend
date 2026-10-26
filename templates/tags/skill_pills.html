@@ -1,0 +1,8 @@
+{% if level %}<span class="pill pill-level">Необхідний рівень{% if languages %} ({{ languages|join:", " }}){% endif %}: {{ level }}</span>{% endif %}
+{% if match %}
+  {% for title in match.matched %}<span class="pill pill-match">{{ title }}</span>{% endfor %}
+  {% for title in match.below %}<span class="pill pill-match">{{ title }}</span>{% endfor %}
+  {% for title in match.missing %}<span class="pill pill-miss">{{ title }}</span>{% endfor %}
+{% else %}
+  {% for title in skills %}<span class="pill pill-neutral">{{ title }}</span>{% endfor %}
+{% endif %}

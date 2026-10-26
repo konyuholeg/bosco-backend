@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load tracker_tags %}
+
+{% block title %}{{ vacancy.position }} — Internship Tracker{% endblock %}
+
+{% block content %}
+<div style="max-width:720px; margin:0 auto;">
+  <div style="margin-bottom:16px;">
+    <a href="{% url 'tracker:application_list' %}" class="back-link">← До списку вакансій</a>
+  </div>
+  <div class="card">
+    <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+      <a href="{% url 'tracker:company_detail' vacancy.company.pk %}" style="color:inherit; text-decoration:none;">{{ vacancy.company.name }}</a>
+    </div>
+    <h1 style="font-size:22px; font-weight:700; margin:4px 0 8px;">{{ vacancy.position }}</h1>
+    <div style="font-size:13px; color:var(--text-muted);">
+      {% if vacancy.location %}{{ vacancy.location }}{% endif %}
+      {% if vacancy.is_remote %} · віддалена робота{% endif %}
+      {% if vacancy.salary %} · {{ vacancy.salary }}{% endif %}
+      · додано {{ vacancy.created_at|date:"d.m.Y" }}
+    </div>
+
+    {% if match %}
+      <div style="margin-top:12px;">
+        <span class="badge {% if match.score >= 80 %}badge-match-high{% elif match.score >= 50 %}badge-match-mid{% else %}badge-match-low{% endif %}">Збіг навичок: {{ match.score }}%</span>
+        {% if match.below %}<span style="font-size:12px; color:var(--text-muted);">Рівень нижчий за потрібний: {{ match.below|join:", " }}</span>{% endif %}
+        {% if match.missing %}<span style="font-size:12px; color:var(--text-muted);">Бракує: {{ match.missing|join:", " }}</span>{% endif %}
+      </div>
+    {% endif %}
+
+    {% if vacancy.skills.all %}
+      <div style="margin:14px 0;">
+        <div class="form-label fw-semibold small">Вимоги</div>
+        {% skill_pills vacancy match %}
+      </div>
+    {% endif %}
+
+    {% if vacancy.description %}
+      <div style="margin:14px 0; font-size:14px; line-height:1.55;">{{ vacancy.description|linebreaksbr }}</div>
+    {% endif %}
+
+    <div class="card-actions">
+      {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary">Відкрити вакансію</a>{% endif %}
+      {% if application %}
+        <a href="{{ application.get_absolute_url }}" class="btn btn-outline-secondary">Моя заявка: {{ application.get_status_display }}</a>
+      {% elif not user.is_authenticated %}
+        <a href="{% url 'tracker:login' %}?next={{ request.path }}" class="btn btn-primary">Увійдіть, щоб відстежувати</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

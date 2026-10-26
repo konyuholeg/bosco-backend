@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Профіль студента — Internship Tracker{% endblock %}
+
+{% block content %}
+<div style="max-width:640px; margin:0 auto;">
+  <div style="margin-bottom:16px;">
+    <p style="font-size:13px; color:var(--text-muted);">
+      Вкажіть ваші навички та рівень володіння кожною. Система порівнює навички з вимогами вакансій та вираховує відсоток збігу.
+    </p>
+  </div>
+
+  <div class="card">
+    {% if not perms.tracker.change_studentprofile %}
+    <div class="alert" style="margin-bottom:12px;">Режим гостя: профіль можна лише переглядати.</div>
+    {% endif %}
+    <form method="POST">
+      {% csrf_token %}
+      <fieldset {% if not perms.tracker.change_studentprofile %}disabled{% endif %} style="border:none; padding:0; margin:0; min-width:0;">
+
+      <div class="form-group">
+        <label class="label">Відмітьте технології, які ви знаєте; для мов програмування та English оберіть рівень володіння</label>
+        <span style="font-size:11px; color:var(--text-muted);">
+          Після відмітки мови програмування поруч зʼявляється вибір рівня: Beginner, Junior, Middle або Senior; для English — A1–C2.
+          Не знаєте, що вказати? Відмічайте лише те, що вже пробували.
+        </span>
+      </div>
+
+      {% for title, items in skill_groups %}
+        <div style="margin:10px 0 4px; font-size:12px; font-weight:700; color:var(--text-muted);">{{ title }}</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px 14px;">
+          {% for value, label, checked, level, choices in items %}
+            <div class="skill-item">
+              <label class="skill-label">
+                <input type="checkbox" name="skill" value="{{ value }}" {% if checked %}checked{% endif %}>
+                {{ label }}
+              </label>
+              {% if choices %}
+              <div class="levels" role="radiogroup" aria-label="Рівень володіння: {{ label }}">
+                {% for code, name in choices %}
+                  <label class="level-option">
+                    <input type="radio" name="level_{{ value }}" value="{{ code }}" {% if level == code %}checked{% endif %}>
+                    <span>{{ name }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <div class="form-group" style="margin-top:14px;">
+        <label class="label">Інші навички (через кому, необовʼязково)</label>
+        <input type="text" name="other_skills" value="{{ other_skills }}" class="input" placeholder="Go, Figma, Jira">
+      </div>
+
+      <div style="margin: 14px 0;">
+        <div style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px;">
+          Активні навички для порівняння:
+        </div>
+        <div>
+          {% for name, level_name in preview %}
+            <span class="pill pill-match" style="font-size:12px; padding:3px 8px;">{{ name }}{% if level_name %} · {{ level_name }}{% endif %}</span>
+          {% empty %}
+            <span style="font-size:12px; color:var(--text-muted);">Поки що нічого не відмічено.</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      </fieldset>
+
+      {% if perms.tracker.change_studentprofile %}
+      <div style="margin-top:20px; padding-top:14px; border-top:1px solid var(--border); text-align:right;">
+        <button type="submit" class="btn btn-primary">Зберегти навички</button>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

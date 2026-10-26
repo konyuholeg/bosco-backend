@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — Internship Tracker{% endblock %}
+
+{% block content %}
+<div style="max-width:440px; margin:40px auto; text-align:center;">
+  <div class="card">
+    <h2 style="font-size:18px; font-weight:700; margin-bottom:10px;">{{ title }}</h2>
+    <p style="font-size:14px; color:var(--text-muted); margin-bottom:20px;">
+      Ви впевнені, що хочете видалити <strong>{{ what }}</strong>? Цю дію не можна скасувати.
+    </p>
+    <form method="POST" style="display:flex; justify-content:center; gap:10px;">
+      {% csrf_token %}
+      <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Скасувати</a>
+      <button type="submit" class="btn btn-outline-danger">Видалити</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

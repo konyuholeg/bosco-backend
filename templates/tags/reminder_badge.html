@@ -1,0 +1,4 @@
+<span class="reminder reminder-{{ reminder.urgency }}">
+  {{ reminder.remind_at|date:"d.m.Y" }} — {{ reminder.text }}
+  {% if reminder.urgency == 'overdue' %}<strong>(прострочено)</strong>{% elif reminder.urgency == 'soon' %}<strong>(скоро)</strong>{% elif reminder.urgency == 'done' %}(виконано){% endif %}
+</span>

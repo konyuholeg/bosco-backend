@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Вхід — Internship Tracker{% endblock %}
+
+{% block content %}
+<div class="mx-auto my-5" style="max-width:400px;">
+  <h1 style="font-size:22px; font-weight:700; margin-bottom:14px; text-align:center; border-left:none; background:none; padding-left:0;">Вхід</h1>
+  <div class="card">
+    <form method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold small" for="{{ form.username.id_for_label }}">Логін</label>
+        {{ form.username }}
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold small" for="{{ form.password.id_for_label }}">Пароль</label>
+        {{ form.password }}
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Увійти</button>
+    </form>
+    <form method="POST" action="{% url 'tracker:guest_login' %}" class="mt-2">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-secondary w-100">Увійти як гість</button>
+    </form>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:14px; text-align:center;">
+      Немає облікового запису? <a href="{% url 'tracker:register' %}">Зареєструватися</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

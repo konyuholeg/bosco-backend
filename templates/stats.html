@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика та діаграми — Internship Tracker{% endblock %}
+
+{% block content %}
+<div class="card py-3 px-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <span class="small fw-semibold text-body-secondary me-1">Період:</span>
+      <a href="{% url 'tracker:stats' %}?period=all" class="btn btn-sm {% if period == 'all' or not period %}btn-primary{% else %}btn-outline-secondary{% endif %}">Ввесь час</a>
+      <a href="{% url 'tracker:stats' %}?period=month" class="btn btn-sm {% if period == 'month' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Останній місяць</a>
+    </div>
+
+    <form method="GET" class="d-flex flex-wrap align-items-center gap-2">
+      <input type="hidden" name="period" value="custom">
+      <label class="small text-body-secondary" for="date_from">Від:</label>
+      <input type="date" id="date_from" name="date_from" value="{{ date_from }}" class="form-control form-control-sm w-auto">
+      <label class="small text-body-secondary" for="date_to">До:</label>
+      <input type="date" id="date_to" name="date_to" value="{{ date_to }}" class="form-control form-control-sm w-auto">
+      <button type="submit" class="btn btn-outline-secondary btn-sm">Застосувати</button>
+      {% if period == 'custom' or date_from or date_to %}
+        <a href="{% url 'tracker:stats' %}" class="btn btn-sm btn-outline-secondary">Скинути</a>
+      {% endif %}
+    </form>
+
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-4">
+    <div class="card kpi kpi-1 h-100 mb-0 text-center">
+      <div class="kpi-value">{{ total }}</div>
+      <div class="kpi-label">Заявок за період</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="card kpi kpi-2 h-100 mb-0 text-center">
+      <div class="kpi-value" style="color:#065f46;">{{ offers }}</div>
+      <div class="kpi-label">Зацікавило</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="card kpi kpi-3 h-100 mb-0 text-center">
+      <div class="kpi-value" style="color:#991b1b;">{{ rejected }}</div>
+      <div class="kpi-label">Відмов</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 align-items-start">
+
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h6 fw-bold mb-0">Діаграма статусів</h2>
+        <div class="btn-group" role="group" aria-label="Тип діаграми">
+          <a href="?{{ filter_qs }}{% if filter_qs %}&{% endif %}chart=pie" class="btn btn-sm {% if chart_type == 'pie' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Кругова</a>
+          <a href="?{{ filter_qs }}{% if filter_qs %}&{% endif %}chart=bar" class="btn btn-sm {% if chart_type == 'bar' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Стовпчики</a>
+        </div>
+      </div>
+
+      {% if total > 0 %}
+        <div class="text-center">
+          <img src="{{ chart_src }}" alt="Діаграма статусів заявок" class="img-fluid">
+        </div>
+      {% else %}
+        <div class="text-center text-body-secondary small py-5 px-2">
+          Немає заявок за вибраний період для побудови діаграми.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card">
+      <h2 class="h6 fw-bold mb-3">Проходження по етапах</h2>
+
+      <div class="d-flex flex-column gap-3">
+        {% for s_val, s_name, s_count, s_color in pipeline %}
+          <div>
+            <div class="d-flex justify-content-between small fw-semibold mb-1">
+              <span>
+                <span class="badge badge-{{ s_val }} me-1">{{ forloop.counter }}</span>
+                {{ s_name }}
+              </span>
+              <span class="text-body-secondary">{{ s_count }} зая. ({% if total > 0 %}{% widthratio s_count total 100 %}{% else %}0{% endif %}%)</span>
+            </div>
+            <div class="progress" style="height:6px;">
+              <div class="progress-bar" role="progressbar" style="width: {% if total > 0 %}{% widthratio s_count total 100 %}{% else %}0{% endif %}%; background: {{ s_color }};"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

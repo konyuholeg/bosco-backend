@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Internship Tracker{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+</head>
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark app-navbar sticky-top">
+    <div class="container app-container">
+      <a href="{% url 'tracker:index' %}" class="navbar-brand">Internship Tracker</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Перемкнути меню">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-md-center gap-md-1">
+          {% if user.is_authenticated %}
+            {% if perms.tracker.view_application %}
+            <li class="nav-item">
+              <a href="{% url 'tracker:application_list' %}" class="nav-link {% if 'application' in request.resolver_match.url_name or 'vacancy' in request.resolver_match.url_name or 'reminder' in request.resolver_match.url_name %}active{% endif %}">Вакансії</a>
+            </li>
+            {% endif %}
+            {% if perms.tracker.view_stats %}
+            <li class="nav-item">
+              <a href="{% url 'tracker:stats' %}" class="nav-link {% if request.resolver_match.url_name == 'stats' %}active{% endif %}">Статистика</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a href="{% url 'tracker:profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Профіль</a>
+            </li>
+            <li class="nav-item">
+              <form method="POST" action="{% url 'tracker:logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-link">Вийти ({% if is_guest %}Гість{% else %}{{ user.username }}{% endif %})</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a href="{% url 'tracker:login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Вхід</a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'tracker:register' %}" class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">Реєстрація</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container app-container pt-4 pb-5">
+    {% for msg in messages %}
+      <div class="alert alert-{% if msg.level_tag == 'error' %}danger{% else %}{{ msg.level_tag }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрити"></button>
+      </div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

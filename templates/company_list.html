@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Компанії — Internship Tracker{% endblock %}
+{% block content %}
+<h1 class="page-title">Компанії</h1>
+{% for company in companies %}
+  <div class="card">
+    <a href="{{ company.get_absolute_url }}" style="font-weight:700; color:var(--text); text-decoration:none;">{{ company.name }}</a>
+    <span class="pill pill-neutral">вакансій: {{ company.n }}</span>
+  </div>
+{% empty %}
+  <div class="card">Компаній поки немає.</div>
+{% endfor %}
+{% include 'includes/pagination.html' %}
+{% endblock %}

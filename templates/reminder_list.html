@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load tracker_tags %}
+
+{% block title %}Нагадування — Internship Tracker{% endblock %}
+
+{% block content %}
+<h1 style="font-size:22px; font-weight:700; margin-bottom:14px;">Нагадування</h1>
+
+<div class="pipeline-bar">
+  <a href="?{% query_string state=None page=None %}" class="pipeline-tab tab-all {% if not current_state %}active{% endif %}">
+    Всі <span class="tab-count">{{ counts.total }}</span>
+  </a>
+  {% for key, label, count in tabs %}
+    <a href="?{% query_string state=key page=None %}" class="pipeline-tab {% if current_state == key %}active{% endif %}">
+      {{ label }} <span class="tab-count">{{ count }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+{% for reminder in reminders %}
+  <div class="card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <div style="margin-bottom:4px;">{% reminder_badge reminder %}</div>
+        <a href="{{ reminder.application.get_absolute_url }}" style="font-size:12px;">
+          {{ reminder.application.vacancy.company.name }} — {{ reminder.application.vacancy.position }}
+        </a>
+      </div>
+      <div class="d-flex gap-2">
+        {% if perms.tracker.change_reminder %}
+          <form method="POST" action="{% url 'tracker:reminder_toggle' reminder.pk %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm">{% if reminder.is_done %}Повернути{% else %}Виконано{% endif %}</button>
+          </form>
+        {% endif %}
+        <a href="{% url 'tracker:reminder_detail' reminder.pk %}" class="btn btn-outline-secondary btn-sm">Докладніше</a>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="card" style="text-align:center; padding:40px; color:var(--text-muted);">
+    <p>Нагадувань немає. Додайте їх зі сторінки заявки в розділі <a href="{% url 'tracker:application_list' %}">«Мої заявки»</a>.</p>
+  </div>
+{% endfor %}
+
+{% include 'includes/pagination.html' %}
+{% endblock %}

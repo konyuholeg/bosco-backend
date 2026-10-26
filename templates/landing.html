@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Internship Tracker — відстежуйте стажування{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+
+<section class="lp-hero">
+  <div>
+    <span class="lp-label">Для студентів і початківців в IT</span>
+    <h1>Усі ваші стажування в одному місці</h1>
+    <p class="lp-lead">
+      Завантажуйте актуальні вакансії, відстежуйте етапи відбору та дізнавайтеся,
+      яких навичок вам бракує для кожної позиції.
+    </p>
+    <div class="lp-actions">
+      <a href="{% url 'tracker:register' %}" class="btn lp-btn-light">Створити акаунт</a>
+      <a href="{% url 'tracker:login' %}" class="btn lp-btn-ghost">Увійти</a>
+      <form method="POST" action="{% url 'tracker:guest_login' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn lp-btn-ghost">Спробувати як гість</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="lp-preview" aria-hidden="true">
+    <div class="lp-preview-company">SoftServe</div>
+    <div class="lp-preview-title">Python Internship</div>
+    <div class="lp-preview-row">
+      <span class="badge badge-applied">Подано заявку</span>
+      <span class="badge badge-match-mid">Збіг навичок: 67%</span>
+    </div>
+    <div class="lp-preview-skills">
+      <span class="pill pill-match">python</span>
+      <span class="pill pill-match">sql</span>
+      <span class="pill pill-miss">docker</span>
+    </div>
+    <div class="lp-bar"><span></span></div>
+  </div>
+</section>
+
+<h2 class="lp-section-title">Що вміє трекер</h2>
+<div class="lp-grid">
+  <div class="card lp-feature">
+    <h3>Вакансії з API</h3>
+    <p>Після входу вакансії всіх напрямків автоматично завантажаться з Jobicy та збережуться у вашому списку разом із вимогами.</p>
+  </div>
+  <div class="card lp-feature">
+    <h3>Режим прогалин</h3>
+    <p>Відмітьте свої навички в профілі, і для кожної вакансії буде видно, що вже збігається, а чого бракує.</p>
+  </div>
+  <div class="card lp-feature">
+    <h3>Воронка відбору</h3>
+    <p>Змінюйте статус від «Знайдено» до «Оффер» і дивіться статистику та діаграму за потрібний період.</p>
+  </div>
+</div>
+
+<h2 class="lp-section-title">Як це працює</h2>
+<div class="lp-grid">
+  <div class="card lp-feature">
+    <div class="lp-step-num">1</div>
+    <h3>Зареєструйтесь</h3>
+    <p>Створіть акаунт за хвилину або спробуйте сайт як гість.</p>
+  </div>
+  <div class="card lp-feature">
+    <div class="lp-step-num">2</div>
+    <h3>Отримайте вакансії</h3>
+    <p>Вакансії всіх напрямків підтягнуться самі. Відсортуйте їх кнопкою «Сортувати».</p>
+  </div>
+  <div class="card lp-feature">
+    <div class="lp-step-num">3</div>
+    <h3>Ведіть відбір</h3>
+    <p>Відмічайте навички, змінюйте статуси й слідкуйте за прогресом.</p>
+  </div>
+</div>
+
+<div class="card lp-cta">
+  <h2>Готові почати?</h2>
+  <div class="lp-actions">
+    <a href="{% url 'tracker:register' %}" class="btn btn-primary">Створити акаунт</a>
+    <a href="{% url 'tracker:login' %}" class="btn btn-outline-secondary">Увійти</a>
+  </div>
+</div>
+{% endblock %}

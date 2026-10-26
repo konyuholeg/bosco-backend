@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Профіль — Internship Tracker{% endblock %}
+
+{% block content %}
+<div style="max-width:480px; margin:60px auto; text-align:center;">
+  <div class="card" style="padding:32px;">
+    <h1 style="font-size:22px; font-weight:700; margin-bottom:10px; border-left:none; background:none; padding-left:0;">Профіль недоступний</h1>
+    <p style="color:var(--text-muted); font-size:14px; margin-bottom:18px;">
+      Щоб вести власний профіль з навичками та бачити збіг із вакансіями, потрібно зареєструватися.
+      Гостьовий профіль порожній і не зберігається.
+    </p>
+    <a href="{% url 'tracker:register' %}" class="btn btn-primary">Зареєструватися</a>
+    <a href="{% url 'tracker:login' %}" class="btn btn-outline-secondary">Увійти</a>
+  </div>
+</div>
+{% endblock %}

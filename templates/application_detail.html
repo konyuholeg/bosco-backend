@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load tracker_tags %}
+
+{% block title %}{{ application.vacancy.position }} — Internship Tracker{% endblock %}
+
+{% block content %}
+{% with vacancy=application.vacancy %}
+<div style="max-width:720px; margin:0 auto;">
+  <div style="margin-bottom:16px;"><a href="{% url 'tracker:application_list' %}" class="back-link">← До моїх заявок</a></div>
+
+  <div class="card card-{{ application.status }}">
+    <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">{{ vacancy.company.name }}</div>
+    <h1 style="font-size:22px; font-weight:700; margin:4px 0 8px;">{{ vacancy.position }}</h1>
+    <div>{% status_badge application.status %}
+      {% if application.applied_at %}<span style="font-size:12px; color:var(--text-muted);"> · подано {{ application.applied_at|date:"d.m.Y" }}</span>{% endif %}
+      {% if match %}<span class="badge {% if match.score >= 80 %}badge-match-high{% elif match.score >= 50 %}badge-match-mid{% else %}badge-match-low{% endif %}">Збіг навичок: {{ match.score }}%</span>{% endif %}
+    </div>
+
+    {% if vacancy.skills.all %}<div style="margin:12px 0;">{% skill_pills vacancy match %}</div>{% endif %}
+    {% if application.notes %}<div class="notes">{{ application.notes|linebreaksbr }}</div>{% endif %}
+
+    <div class="card-actions">
+      <a href="{{ vacancy.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">Вакансія в каталозі</a>
+      {% if vacancy.url %}<a href="{{ vacancy.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">Відкрити вакансію</a>{% endif %}
+      {% if perms.tracker.change_application %}<a href="{% url 'tracker:application_edit' application.pk %}" class="btn btn-outline-secondary btn-sm">Редагувати</a>{% endif %}
+      {% if perms.tracker.change_application %}
+        <form method="POST" action="{% url 'tracker:dismiss_application' application.pk %}" style="display:inline;">{% csrf_token %}
+          <button type="submit" class="btn btn-outline-secondary btn-sm">Нецікаво</button>
+        </form>
+      {% endif %}
+      {% if perms.tracker.delete_application %}<a href="{% url 'tracker:application_delete' application.pk %}" class="btn btn-outline-danger btn-sm">Видалити</a>{% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <h2 style="font-size:16px; font-weight:700;">Нагадування</h2>
+      {% if perms.tracker.add_reminder %}<a href="{% url 'tracker:reminder_add' application.pk %}" class="btn btn-primary btn-sm">+ Додати</a>{% endif %}
+    </div>
+    {% for reminder in application.reminders.all %}
+      <div class="reminder-row">
+        {% reminder_badge reminder %}
+        <span style="display:flex; gap:6px;">
+          {% if perms.tracker.change_reminder %}
+            <form method="POST" action="{% url 'tracker:reminder_toggle' reminder.pk %}">{% csrf_token %}
+              <button type="submit" class="btn btn-outline-secondary btn-sm">{% if reminder.is_done %}Повернути{% else %}Виконано{% endif %}</button>
+            </form>
+            <a href="{% url 'tracker:reminder_edit' reminder.pk %}" class="btn btn-outline-secondary btn-sm">Змінити</a>
+          {% endif %}
+          {% if perms.tracker.delete_reminder %}<a href="{% url 'tracker:reminder_delete' reminder.pk %}" class="btn btn-outline-danger btn-sm">Видалити</a>{% endif %}
+        </span>
+      </div>
+    {% empty %}
+      <p style="font-size:13px; color:var(--text-muted);">Нагадувань немає. Додайте дату співбесіди чи дедлайн тестового завдання.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endwith %}
+{% endblock %}

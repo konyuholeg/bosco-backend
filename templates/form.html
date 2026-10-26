@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — Internship Tracker{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width:580px;">
+  <div style="margin-bottom:16px;"><a href="{{ cancel_url }}" class="back-link">← Назад</a></div>
+  <h1 class="page-title" style="font-size:18px;">{{ title }}</h1>
+  <div class="card">
+    <form method="POST">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      {% for field in form %}
+        <div class="mb-3">
+          {% if field.widget_type == 'checkbox' %}
+            <div class="form-check">
+              {{ field }}
+              <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+          {% else %}
+            <label class="form-label fw-semibold small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+          {% endif %}
+          {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+          {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+        <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Скасувати</a>
+        <button type="submit" class="btn btn-primary">{{ submit_label|default:"Зберегти" }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

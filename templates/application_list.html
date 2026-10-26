@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load tracker_tags %}
+
+{% block title %}Вакансії — Internship Tracker{% endblock %}
+
+{% block content %}
+{% if upcoming %}
+<div class="card upcoming">
+  <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Найближчі та прострочені нагадування</div>
+  {% for reminder in upcoming %}
+    <div style="margin:4px 0;">
+      {% reminder_badge reminder %}
+      <a href="{{ reminder.get_absolute_url }}" style="font-size:12px;">{{ reminder.application.vacancy }}</a>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="GET" class="card sort-bar d-flex flex-row flex-wrap align-items-center gap-2">
+  {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+  {% if gaps_mode %}<input type="hidden" name="gaps" value="1">{% endif %}
+  <label for="category" style="font-size:13px; color:var(--text-muted);">Сортувати за:</label>
+  {{ sort_form.category }}
+  <button type="submit" class="btn btn-primary btn-sm">Сортувати</button>
+</form>
+
+<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+  {% if not is_guest %}
+    {% if gaps_mode %}
+      <a href="?{% query_string gaps=None page=None %}" class="btn btn-primary btn-sm" aria-pressed="true">Режим прогалин</a>
+    {% else %}
+      <a href="?{% query_string gaps='1' page=None %}" class="btn btn-outline-secondary btn-sm" aria-pressed="false">Режим прогалин</a>
+    {% endif %}
+  {% endif %}
+</div>
+
+{% if gaps_mode and top_gaps %}
+  <div class="card" style="padding:12px 16px; margin-bottom:12px;">
+    <div style="font-size:13px; font-weight:700; margin-bottom:6px;">Чого вам найчастіше бракує у цих вакансіях:</div>
+    {% for skill, count in top_gaps %}<span class="pill pill-miss" style="font-size:12px;">{{ skill }} — {{ count }}</span>{% endfor %}
+  </div>
+{% endif %}
+
+<div class="pipeline-bar">
+  <a href="?{% query_string status=None page=None %}" class="pipeline-tab tab-all {% if not current_status %}active{% endif %}">
+    Всі <span class="tab-count">{{ counts.total }}</span>
+  </a>
+  {% for key, label, count in tabs %}
+    <a href="?{% query_string status=key page=None %}" class="pipeline-tab tab-{{ key }} {% if current_status == key %}active{% endif %}">
+      {{ label }} <span class="tab-count">{{ count }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+{% for application in applications %}
+  {% with vacancy=application.vacancy %}
+  <div class="card card-{{ application.status }}">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">{{ vacancy.company.name }}</div>
+        <h2 style="font-size:18px; font-weight:700; margin-top:2px;">
+          <a href="{{ application.get_absolute_url }}" style="color:var(--text); text-decoration:none;">{{ vacancy.position }}</a>
+        </h2>
+        {% if vacancy.location or vacancy.salary %}
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">{{ vacancy.location }}{% if vacancy.salary %} · {{ vacancy.salary }}{% endif %}</div>
+        {% endif %}
+      </div>
+      {% if application.match %}
+        <span class="badge {% if application.match.score >= 80 %}badge-match-high{% elif application.match.score >= 50 %}badge-match-mid{% else %}badge-match-low{% endif %}">Збіг навичок: {{ application.match.score }}%</span>
+      {% endif %}
+    </div>
+
+    {% if vacancy.skills.all %}
+      <div style="margin:10px 0; font-size:12px;">
+        <span style="color:var(--text-muted); margin-right:6px;">Вимоги вакансії:</span>
+        {% skill_pills vacancy application.match %}
+      </div>
+    {% endif %}
+
+    {% if gaps_mode and application.match %}
+      <div class="gap-note {% if application.match.missing %}gap-note-miss{% else %}gap-note-ok{% endif %}">
+        {% if application.match.missing %}<strong>Бракує ({{ application.match.missing|length }}):</strong> {{ application.match.missing|join:", " }}
+        {% elif vacancy.skills.all %}<strong>Прогалин немає</strong>, ви відповідаєте всім вимогам
+        {% else %}Для цієї вакансії вимоги не вказано{% endif %}
+      </div>
+    {% endif %}
+
+    {% if application.next_reminder %}<div style="margin:8px 0;">{% reminder_badge application.next_reminder %}</div>{% endif %}
+
+    <div class="card-actions" style="justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; color:var(--text-muted);">Статус:</span>
+        {% if perms.tracker.change_application %}
+          <form method="POST" action="{% url 'tracker:change_status' application.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <select name="status" onchange="this.form.submit();" class="form-select form-select-sm w-auto">
+              {% if application.status == 'found' %}<option selected hidden>Знайдено</option>{% endif %}
+              {% for key, label in settable_statuses %}
+                <option value="{{ key }}" {% if key == application.status %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        {% else %}
+          {% status_badge application.status %}
+        {% endif %}
+      </div>
+      <div style="display:flex; gap:8px;">
+        {% if perms.tracker.change_application %}
+          <form method="POST" action="{% url 'tracker:dismiss_application' application.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">Нецікаво</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+{% empty %}
+  <div class="card" style="text-align:center; padding:40px; color:var(--text-muted);">
+    <p>Немає вакансій у цьому списку. Вакансії з Jobicy завантажуються автоматично під час входу.</p>
+  </div>
+{% endfor %}
+
+{% include 'includes/pagination.html' %}
+{% endblock %}
